@@ -82,6 +82,7 @@ target_include_directories(redis-benchmark
     PRIVATE ${REDIS_ROOT}/deps/lua/src
 )
 
+add_library(cuckootable STATIC src/cuckootable.cc)
 
 target_link_libraries(redis-server
     PRIVATE pthread
@@ -109,3 +110,4 @@ target_link_libraries(redis-benchmark
 )
 
 link_directories(deps/hiredis/ deps/linenoise/ diredeps/lua/src)
+add_definitions(-std=c++11)
