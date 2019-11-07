@@ -24,6 +24,13 @@
 * redis-benchmark.c/processEvents()：该函数其实就是创建线程processEventOnce()
 * redis-benchmark.c/processEventOnce()：最终的工作线程负责调用RDMA的post_send发送客户端请求
 
+### RDMA parameters ###
+
+* Connection type：RC
+* verb：WRITE_WITH_IMM
+* inline：no
+* poll strategy：busy polling
+
 
 
 
