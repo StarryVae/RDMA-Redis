@@ -32,5 +32,11 @@
 * poll strategy：busy polling
 
 
+### To be solved ###
 
+很明显，write_with_imm一方面不能使用inline的优势，另一方面它是two-sided的verb，性能不如one-sided的write verb，因此利用write来进行client到server的通信会进一步提升性能，但设计也会相应的更为复杂。
+主要的问题就在于write不需要server端post recv，也就不会产生cqe，从而导致server端无法感知client请求的到来，也就不能立即处理请求。
+
+目前考虑的方案是采取Accelerating Redis with RDMA Over InfiniBand文章中的方法，将server端的接收信息的buffer分成多个chunk，每个chunk对应于一个client，同时client的请求信息的格式也需要重新定制，
+包括：request head, command and ending flag，其中的ending flag可以用来判断请求信息的到来。
 
