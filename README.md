@@ -6,6 +6,18 @@
     - cd build
     - cmake ..  
     - make all
+	
+## Quick Start ##
+
+### Server ###
+
+    - cd build
+    - sudo ./redis-server
+	
+### Client ###
+
+    - cd build
+    - sudo ./redis-benchmark
 
 ## Communication design details ##
 
