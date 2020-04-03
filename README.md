@@ -36,6 +36,7 @@
 * redis-benchmark.c/processEvents()：该函数其实就是创建线程processEventOnce()
 * redis-benchmark.c/processEventOnce()：最终的工作线程负责调用RDMA的post_send发送客户端请求
 
+
 ### RDMA parameters ###
 
 * Connection type：RC
@@ -51,4 +52,10 @@
 
 目前考虑的方案是采取Accelerating Redis with RDMA Over InfiniBand文章中的方法，将server端的接收信息的buffer分成多个chunk，每个chunk对应于一个client，同时client的请求信息的格式也需要重新定制，
 包括：request head, command and ending flag，其中的ending flag可以用来判断请求信息的到来。
+
+### 代码详细分析###
+
+首先，元语一定使用的是WRITE_WITH_IMM，远端内存信息也在QP建立连接时传输完成了（struct cm_con_data_t），这些换成WRITE元语
+之后一样适用。接下来主要考虑接收数据的buffer在代码中的位置，经过分析，redisServer结构体中的resources结构体中的buff变量是
+接收数据的buffer。
 
