@@ -62,6 +62,8 @@
 接下来重新定制client端信息发送的格式以及poll completion得改成对这个格式中的某个flag进行的循环检测以感知信息的到来。
 这个功能在server端的processEventOnce函数中。
 
+关于定制client端信息发送的格式，应该是在结构体redisGetRequest以及redisSetRequest中添加flag位，比如都是最后一位。
+
 processEventOnce函数中的poll_completion_函数那块代码的意思应该是奇数的qp_id代表的是负责接收的qp，而偶数的qp_id代表的是负责发送
 的qp，因此poll cqe需要先poll掉发送完成的cqe才能得到接收数据产生的wqe，也就预示着客户端有请求发送过来了。那我们就可以直接poll flag
 监测请求的到来，然后poll_completion_只负责poll发送完成的通知。
