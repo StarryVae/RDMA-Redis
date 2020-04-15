@@ -50,6 +50,7 @@
 
 #define REDIS_NOTUSED(V) ((void) V)
 #define RANDPTR_INITIAL_SIZE 8
+int starry = 0;
 extern struct config_t config_rdma;
 struct resources res;
 int nn = 0;
@@ -758,6 +759,7 @@ void *processEventOnce(void *t_data)
         if(3 == getSetFlags)
         {
             //set cmd
+            strcpy(set_req.flag, "r");
             strcpy(set_req.cmd, "set");
             sprintf(set_req.key,"key");
 
@@ -767,6 +769,7 @@ void *processEventOnce(void *t_data)
         }
         else if(2 == getSetFlags) //get cmd
         {
+            strcpy(get_req.flag, "r");
             strcpy(get_req.cmd, "get");
             sprintf(get_req.key,"key");
             c->req = (void*) (&get_req);
@@ -777,6 +780,7 @@ void *processEventOnce(void *t_data)
         {
             if(ycsb10Flags == 9)
             {
+                strcpy(set_req.flag, "r");
                 strcpy(set_req.cmd, "set");
                 sprintf(set_req.key,"key");
                 memset(set_req.value,'x',MSG_SIZE - 30);
@@ -785,6 +789,7 @@ void *processEventOnce(void *t_data)
             }
             else
             {
+                strcpy(get_req.flag, "r");
                 strcpy(get_req.cmd, "get");
                 sprintf(get_req.key,"key");
                 c->req = (void*) (&get_req);
@@ -795,6 +800,7 @@ void *processEventOnce(void *t_data)
         {
             if(ycsb50Flags)
             {
+               strcpy(set_req.flag, "r");
                strcpy(set_req.cmd, "set");
                sprintf(set_req.key,"key");
                memset(set_req.value,'x',MSG_SIZE - 30);
@@ -803,6 +809,7 @@ void *processEventOnce(void *t_data)
             }
             else
             {
+                strcpy(get_req.flag, "r");
                 strcpy(get_req.cmd, "get");
                 sprintf(get_req.key,"key");
                 c->req = (void*) (&get_req);
@@ -814,7 +821,8 @@ void *processEventOnce(void *t_data)
         memcpy((uintptr_t)res.buf + (task_id * 2 + 1) * MSG_SIZE,c->req, sizeof(c->req));
 //        IBV_WR_RDMA_WRITE_WITH_IMM
 //        start = ustime();
-        if (post_send(&res, task_id * 2 + 1,  IBV_WR_RDMA_WRITE_WITH_IMM, true))
+        
+        if (post_send(&res, task_id * 2 + 1,  IBV_WR_RDMA_WRITE, true))
         {
 //            fprintf(stderr, "failed to post SR 3\n");
             return REDIS_ERR;
@@ -912,7 +920,7 @@ int main(int argc, const char **argv) {
     config_rdma.tcp_port = 10086;
     config_rdma.ib_port = 1;
     config_rdma.gid_idx = -1;
-    config_rdma.server_name = "10.11.6.114";
+    config_rdma.server_name = "10.128.16.214";
 
     srandom(time(NULL));
     signal(SIGHUP, SIG_IGN);

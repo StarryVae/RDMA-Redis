@@ -3765,12 +3765,30 @@ int processEventOnce(void *task_id_)
     if((c = createClient_(-1,*task_id )) == NULL)
         return REDIS_ERR;
 
+    int qp_id = 1;
+    c->qp_id = qp_id;
+    wc.qp_num = 1;
+    char flag[2];
+    strcpy(flag, "w");
+    memset(server.res.buf + c->qp_id * MSG_SIZE, 'w', 1);
+//    printf("haha\n");
+    
     while(1)
     {
-//        resetClient(c);
-        int qp_id = 0;
-        wc.qp_num = 1;
-        while(qp_id %2 != 1)
+//        resetClient(c);    
+	while(1)
+	{
+	    memcpy(flag, server.res.buf + c->qp_id * MSG_SIZE, 2);
+//            printf("hehe\n");
+            if(!strcmp(flag, "r"))
+            {
+                strcpy(flag, "w");
+                memset(server.res.buf + c->qp_id * MSG_SIZE, 'w', 1);
+                break;
+            }
+	}
+//       printf("hehe\n"); 
+/*        while(qp_id %2 != 1)
         {
             if (poll_completion_(&server.res, *task_id, &wc))
             {
@@ -3778,15 +3796,13 @@ int processEventOnce(void *task_id_)
                return REDIS_ERR;
             }
             qp_id = find_local_qp_by_id(wc.qp_num);
-        }
-
-        if (post_receive(&server.res, qp_id))
-        {
-            fprintf(stderr, "failed to post RR\n");
-        }
-        c->qp_id = qp_id;
+        }*/
+//        if (post_receive(&server.res, qp_id))
+//        {
+//            fprintf(stderr, "failed to post RR\n");
+//        }
         char cmd[4];
-        memcpy(cmd, server.res.buf + c->qp_id * MSG_SIZE, 4);
+        memcpy(cmd, server.res.buf + c->qp_id * MSG_SIZE + 1, 4);
         if(strcmp(cmd,"get") == 0)
         {   
              redisGetRequest *req = (redisGetRequest *)(server.res.buf + qp_id * MSG_SIZE);
@@ -3812,9 +3828,15 @@ int processEventOnce(void *task_id_)
         }
 
         processEvents(c);
+        if (poll_completion_(&server.res, *task_id, &wc))
+        {
+           fprintf(stderr, "poll completion failed 3\n");
+           return REDIS_ERR;
+        }
+
 //        memset(server.res.buf + qp_id * MSG_SIZE, 0, MSG_SIZE);
         resetClient(c);
-        qp_id = 0;
+//        qp_id = 0;
     }
 
 }
